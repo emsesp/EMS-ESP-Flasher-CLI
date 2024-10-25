@@ -1,4 +1,4 @@
-# EMS-ESP flash tool
+# EMS-ESP flash tool - Command Line Interface
 
 ## Fist time setup
 
@@ -7,10 +7,8 @@
 - install pip (<https://realpython.com/what-is-pip/#using-pip-in-a-python-virtual-environment>)
 - install the python libraries: `pip install -r requirements.txt`
 - install `minicom` using `apt-get install minicom` on WSL2 or Linux. This is a simple terminal program to connect to the serial port of the device so we can Telnet to EMS-ESP and check if its working.
-- make sure all the shell scripts are executable: `chmod +x *.sh`. Those are firmware/firmware.sh, upload/E32V2/upload.sh and upload/S3/upload.sh.
+- make sure all the shell scripts are executable: `chmod +x *.sh`. Those are `firmware/firmware.sh`, `upload/E32V2/upload.sh` and `upload/S3/upload.sh`.
 - optional for Windows/WSL: install `udbisp` to access the Windows COM ports. `winget install usbipd`. See <https://github.com/dorssel/usbipd-win>.
-
-## Setting up
 
 If you're running Python in a virtual environment, you need to activate it first:
 
@@ -56,4 +54,4 @@ Run the command using this syntax:
 
 After a successful upload, it will try and connect to the EMS-ESP via the USB/serial port and output the board profile. Make sure you verify this. If nothing is shown then perhaps the USB doesn't support Serial/UART. You can manually check this using `minicom -D <port>`.
 
-(Note: if you're using WSL2, use `usbipd list` from a DOS/PowerShell admin window to show all the available COM ports and then connect to one using a command like `usbipd attach -a -w -b 2-3` (after first binding it with for example `usbipd bind --busid 2-3`). Check on the Linux WSL2 whether you now have a USB port in `/dev` like `/dev/ttyUSB0` or `ttyACM0`.)
+(Note: if you're using WSL2, use `usbipd list` from a DOS/PowerShell admin window to show all the available COM ports and then connect to one using a command like `usbipd attach -a -w -b 2-3` (after first binding it with for example `usbipd bind --busid 2-3`). Check on the Linux WSL2 whether you now have a USB port in `/dev` like `/dev/ttyUSB0` or `ttyACM0`)
