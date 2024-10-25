@@ -1,0 +1,19 @@
+# Python package requirements for ESP-IDF. These are the so called core features which are installed in all systems.
+#
+# Install with pip install -r requirements.txt
+#
+
+setuptools
+packaging
+importlib_metadata; python_version < "3.8"
+click
+pyserial
+cryptography
+pyparsing
+pyelftools
+esptool
+esp-idf-nvs-partition-gen
+esp-idf-size
+esp-idf-panic-decoder
+pyclang
+construct

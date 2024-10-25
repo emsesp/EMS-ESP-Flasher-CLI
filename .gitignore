@@ -1,0 +1,20 @@
+# vscode
+.vscode/*
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# python virtual environment
+venv/
+
+# generated flash files
+flash/*_tmp.csv
+config/bin
+config/csv
+*_tmp*
+__pycache__
+firmware/*.md
+firmware/EMS-ESP-*.md5
+firmware/EMS-ESP-*.bin
+console_capture.txt
