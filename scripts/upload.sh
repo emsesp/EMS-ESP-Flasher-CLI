@@ -46,11 +46,13 @@ fi
 echo "* Checking if an ESP32 is connected to the COM port..."
 
 # connect using esptool, and replace all newlines with a pipe
-connect_info=$(python ./scripts/local_esptool.py $port_arg flash_id | tr -d '\r')
+connect_info=$(python ./scripts/local_esptool.py $port_arg flash_id)
+connect_error=$?
+connect_info=$(echo "$connect_info" | tr -d '\r')
 connect_info=${connect_info//[$'\r\n']/| }
 
 # check for errors
-if [[ $connect_info == *"error"* ]]; then
+if [[ $connect_error -ne 0 ]]; then
   echo ""
   echo "Failed to connect to ESP32. Exiting."
   echo ""
@@ -113,7 +115,7 @@ if [ ! -f $firmware_file ]; then
   exit 1
 fi
 
-# get current data
+# get current date
 current_date=$(date)
 
 # filename of firmware used
