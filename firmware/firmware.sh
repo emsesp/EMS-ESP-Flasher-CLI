@@ -11,10 +11,10 @@ cd firmware
 rm -f *.bin *.md5 *.md
 
 # for dev versions:
-gh release download latest -R emsesp/EMS-ESP32 --clobber
+gh release download latest -R emsesp/EMS-ESP32
 
 # for stable versions:
-gh release download -p "*" -R emsesp/EMS-ESP32 --clobber
+gh release download -p "*" -R emsesp/EMS-ESP32
 
 # don't need the changelog or the .md5 files
 rm -f *.md*
