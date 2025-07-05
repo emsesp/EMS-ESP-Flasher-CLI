@@ -46,7 +46,7 @@ fi
 echo "* Checking if an ESP32 is connected to the COM port..."
 
 # Check the version of esptool.py and call the appropriate function
-esptool_version=$(python ./scripts/local_esptool.py version | cut -d ' ' -f 2)
+esptool_version=$(python ./scripts/local_esptool.py version | tail -n1 | cut -d ' ' -f 2)
 echo "* Using esptool.py version $esptool_version"
 
 # Flash ID argument changes in esptool.py v5.x
