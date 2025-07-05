@@ -59,7 +59,7 @@ if [[ $connect_error -ne 0 ]]; then
   exit 1
 fi
 
-function pre_v5 {
+function parse_esptool_pre_v5 {
   # Function to handle pre-v5 versions of esptool.py
   # Side-effect: sets the global variables `mac` and `port`
 
@@ -111,7 +111,7 @@ function pre_v5 {
   fi
 }
 
-function post_v5 {
+function parse_esptool_v5 {
   # Input looks like this
   #
   # esptool v5.0.0
@@ -158,10 +158,11 @@ port=""
 
 # Check the version of esptool.py and call the appropriate function
 esptool_version=$(python ./scripts/local_esptool.py --version | cut -d ' ' -f 2)
+echo "* Using esptool.py version $esptool_version"
 if [[ $esptool_version == 5.* ]]; then
-  post_v5
+  parse_esptool_v5
 else
-  pre_v5
+  parse_esptool_pre_v5
 fi
 
 # Check if the required values are set
