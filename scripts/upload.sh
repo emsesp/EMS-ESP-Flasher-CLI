@@ -91,6 +91,7 @@ function parse_esptool_pre_v5 {
   # find MAC address
   mac=${connect_info##*MAC: }
   mac=${mac%%|*}
+  mac=$(echo $mac | tr -d '[:space:]')
 
   if [[ $mac == *"esptool"* ]]; then
     echo ""
@@ -135,6 +136,7 @@ function parse_esptool_v5 {
   # find MAC address
   mac=${connect_info##*MAC: }
   mac=${mac%%|*}
+  mac=$(echo $mac | tr -d '[:space:]')
   if [[ $mac == *"esptool"* ]]; then
     echo ""
     echo "Can't find MAC address. Exiting."
