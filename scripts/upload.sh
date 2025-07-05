@@ -45,8 +45,19 @@ fi
 # Uses https://github.com/espressif/esp-idf/blob/master/components/esptool_py/esptool/esptool.py
 echo "* Checking if an ESP32 is connected to the COM port..."
 
+# Check the version of esptool.py and call the appropriate function
+esptool_version=$(python ./scripts/local_esptool.py version | cut -d ' ' -f 2)
+echo "* Using esptool.py version $esptool_version"
+
+# Flash ID argument changes in esptool.py v5.x
+# In v4.x it is `flash_id`, in v5.x it is `flash-id`
+arg_flash_id="flash_id"
+if [[ $esptool_version == 5.* ]]; then
+  arg_flash_id="flash-id"
+fi
+
 # connect using esptool, and replace all newlines with a pipe
-connect_info=$(python ./scripts/local_esptool.py $port_arg flash_id)
+connect_info=$(python ./scripts/local_esptool.py $port_arg $arg_flash_id)
 connect_error=$?
 connect_info=$(echo "$connect_info" | tr -d '\r')
 connect_info=${connect_info//[$'\r\n']/| }
@@ -158,9 +169,6 @@ function parse_esptool_v5 {
 mac=""
 port=""
 
-# Check the version of esptool.py and call the appropriate function
-esptool_version=$(python ./scripts/local_esptool.py --version | cut -d ' ' -f 2)
-echo "* Using esptool.py version $esptool_version"
 if [[ $esptool_version == 5.* ]]; then
   parse_esptool_v5
 else
