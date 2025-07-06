@@ -45,8 +45,19 @@ fi
 # Uses https://github.com/espressif/esp-idf/blob/master/components/esptool_py/esptool/esptool.py
 echo "* Checking if an ESP32 is connected to the COM port..."
 
+# Check the version of esptool.py and call the appropriate function
+esptool_version=$(python ./scripts/local_esptool.py version | tail -n1 | cut -d ' ' -f 2)
+echo "* Using esptool.py version $esptool_version"
+
+# Flash ID argument changes in esptool.py v5.x
+# In v4.x it is `flash_id`, in v5.x it is `flash-id`
+arg_flash_id="flash_id"
+if [[ $esptool_version == 5.* ]]; then
+  arg_flash_id="flash-id"
+fi
+
 # connect using esptool, and replace all newlines with a pipe
-connect_info=$(python ./scripts/local_esptool.py $port_arg flash_id)
+connect_info=$(python ./scripts/local_esptool.py $port_arg $arg_flash_id)
 connect_error=$?
 connect_info=$(echo "$connect_info" | tr -d '\r')
 connect_info=${connect_info//[$'\r\n']/| }
@@ -59,26 +70,109 @@ if [[ $connect_error -ne 0 ]]; then
   exit 1
 fi
 
-# find MAC address
-mac=${connect_info##*MAC: }
-mac=${mac%%|*}
+function parse_esptool_pre_v5 {
+  # Function to handle pre-v5 versions of esptool.py
+  # Side-effect: sets the global variables `mac` and `port`
 
-if [[ $mac == *"esptool"* ]]; then
-  echo ""
-  echo "Can't find MAC address. Exiting."
-  echo ""
-  exit 1
-fi
+  # Input looks like this
+  #
+  # esptool.py v4.9.0
+  # Serial port /dev/ttyCH341USB0
+  # Connecting...
+  # Failed to get PID of a device on /dev/ttyCH341USB0, using standard reset sequence.
+  # ..
+  # Detecting chip type... Unsupported detection protocol, switching and trying again...
+  # Connecting...
+  # Failed to get PID of a device on /dev/ttyCH341USB0, using standard reset sequence.
+  # .
+  # Detecting chip type... ESP32
+  # Chip is ESP32-D0WD-V3 (revision v3.1)
+  # Features: WiFi, BT, Dual Core, 240MHz, VRef calibration in efuse, Coding Scheme None
+  # Crystal is 40MHz
+  # MAC: <stripped>
+  # Uploading stub...
+  # Running stub...
+  # Stub running...
+  # Manufacturer: 5e
+  # Device: 4016
+  # Detected flash size: 4MB
+  # Flash voltage set by a strapping pin to 3.3V
+  # Hard resetting via RTS pin...
 
-# find USB port
-port=${connect_info##*Serial port }
-port=${port%%|*}
+  # find MAC address
+  mac=${connect_info##*MAC: }
+  mac=${mac%%|*}
+  mac=$(echo $mac | tr -d '[:space:]')
 
-if [[ $port == *"esptool"* ]]; then
-  echo ""
-  echo "Can't find COM port. Exiting."
-  echo ""
-  exit 1
+  if [[ $mac == *"esptool"* ]]; then
+    echo ""
+    echo "Can't find MAC address. Exiting."
+    echo ""
+    exit 1
+  fi
+
+  # find USB port
+  port=${connect_info##*Serial port }
+  port=${port%%|*}
+
+  if [[ $port == *"esptool"* ]]; then
+    echo ""
+    echo "Can't find COM port. Exiting."
+    echo ""
+    exit 1
+  fi
+}
+
+function parse_esptool_v5 {
+  # Input looks like this
+  #
+  # esptool v5.0.0
+  # Connected to ESP32 on /dev/ttyCH341USB0:
+  # Chip type:          ESP32-D0WD-V3 (revision v3.1)
+  # Features:           Wi-Fi, BT, Dual Core + LP Core, 240MHz, Vref calibration in eFuse, Coding Scheme None
+  # Crystal frequency:  40MHz
+  # MAC:                <stripped>
+  # 
+  # Stub flasher running.
+  # 
+  # Flash Memory Information:
+  # =========================
+  # Manufacturer: 5e
+  # Device: 4016
+  # Detected flash size: 4MB
+  # Flash voltage set by a strapping pin: 3.3V
+  # 
+  # Hard resetting via RTS pin...
+
+  # find MAC address
+  mac=${connect_info##*MAC: }
+  mac=${mac%%|*}
+  mac=$(echo $mac | tr -d '[:space:]')
+  if [[ $mac == *"esptool"* ]]; then
+    echo ""
+    echo "Can't find MAC address. Exiting."
+    echo ""
+    exit 1
+  fi
+
+  # find USB port
+  port=${connect_info##*Connected to ESP32 on }
+  port=${port%%:*}
+  if [[ $port == *"esptool"* ]]; then
+    echo ""
+    echo "Can't find COM port. Exiting."
+    echo ""
+    exit 1
+  fi
+}
+
+mac=""
+port=""
+
+if [[ $esptool_version == 5.* ]]; then
+  parse_esptool_v5
+else
+  parse_esptool_pre_v5
 fi
 
 # Check if the required values are set
